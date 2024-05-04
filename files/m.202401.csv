@@ -1,0 +1,7 @@
+item_name,is_expense,quantity,sum_of_one
+Шарики,TRUE,500,10
+Мороженное,TRUE,1000,15
+Газировка,TRUE,1600,20
+Шарики,FALSE,500,30
+Мороженное,FALSE,900,60
+Газировка,FALSE,1550,80
