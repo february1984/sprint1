@@ -1,8 +1,6 @@
-import javax.swing.text.Style;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.PrivilegedExceptionAction;
 import java.util.*;
 
 public class Main {
@@ -10,7 +8,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         String command = "Start";
         ArrayList<String[]> fileLines = new ArrayList<>();
-        boolean execResult;
+        ArrayList<String> mRep = new ArrayList<>();
 
         while (!command.equals("E")){
             System.out.println("Введите команду:\t" +
@@ -24,7 +22,8 @@ public class Main {
                 }
             else if (command.equals("M")){
                 System.out.println("Пожалуйста введите номер месяца:");
-                    int month = Integer.parseInt(scanner.nextLine());
+                    String month = scanner.nextLine();
+                    mRep = monthReport(fileLines, month);
             }
 
         }
@@ -72,13 +71,37 @@ public class Main {
             System.out.println(value);
         }
     }
-    private static void monthReport(ArrayList<String> fileLines, int month){
-        String[][] result = new String[4][fileLines.size()];
-            for (int i = 0; i < fileLines.size(); i++){
-                String currLine = fileLines.get(i);
-                String[] currLineValues = currLine.split(",");
-
+    private static ArrayList<String> monthReport(ArrayList<String[]> fileLines, String month){
+        ArrayList<String> result = new ArrayList<>();//Результирующий список с отчетом
+        String[] readLine = new String[4];//Массив для считывания строки
+        String writeToReport = "0";//Строка для обработки записи в отчет
+        for (String[] fileLine : fileLines) {//Запись в список уникальных пар Объект + Тип транзакции
+            readLine = fileLine;
+            if (readLine[0].equals(month)) {
+                writeToReport = readLine[1] + " " + readLine[2];
+                if (!result.contains(writeToReport)) {
+                    result.add(writeToReport);
+                }
             }
+        }
+        for (String currResultLine : result) {//Проходимся по уникальным парам и плюсуем в них соответвующие транзакции
+            double sum = 0;
+            double cost = 0;
+            for (String[] fileLine : fileLines) {
+                readLine = fileLine;
+                if (readLine[0].equals(month)) {
+                    if (currResultLine.equals(readLine[1] + " " + readLine[2])) {
+                        sum += Double.parseDouble(readLine[3]);
+                        cost = Double.parseDouble(readLine[4]);
+                    }
+                }
+            }
+            result.set(result.indexOf(currResultLine),currResultLine + " " + sum + " " + cost);
+        }
+        for (String curr :result){
+            System.out.println(curr);
+        }
+        return result;
     }
     private static String choosePath (String fileName){
         System.out.println("Путь по умолчанию:\n" +
