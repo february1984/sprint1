@@ -7,7 +7,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         String command = "Start";
-        ArrayList<String[]> fileLines = new ArrayList<>();
+        ArrayList<String> fileLines = new ArrayList<>();
         ArrayList<String> mRep = new ArrayList<>();
 
         while (!command.equals("E")){
@@ -16,13 +16,16 @@ public class Main {
                     "Y-Годовой отчет\t" +
                     "E-Выход\t");
             command = scanner.nextLine();
-            fileLines = getLines();//Считываем файл
             if (command.equals("S")){
+                System.out.println("Пожалуйста введите номер месяца:");
+                String month = scanner.nextLine();
+                fileLines = getLines(month);
                 showFile(fileLines);
                 }
             else if (command.equals("M")){
                 System.out.println("Пожалуйста введите номер месяца:");
                     String month = scanner.nextLine();
+                    fileLines = getLines(month);//Считываем файл
                     mRep = monthReport(fileLines, month);
             }
 
@@ -35,35 +38,27 @@ public class Main {
             return null;
         }
     }
-    private static ArrayList<String[]> getLines(){
-        ArrayList<String[]> result = new ArrayList<>();
-        for (int m = 1; m < 10; m++) {
-            String file = readFiles("C:\\Users\\Admin\\IdeaProjects\\sprint1\\files\\m.20240"+m+".csv");
+    private static ArrayList<String> getLines(String month){
+        ArrayList<String> result = new ArrayList<>();
+        if (Integer.parseInt(month) <  10){
+            String file = readFiles("C:\\Users\\Admin\\IdeaProjects\\sprint1\\files\\m.20240"+month+".csv");
             if (file != null) {
                 String[] lines = file.split("\\n");
-                for (int i = 1; i < lines.length; i++) {
-                        lines[i] = m+ "," + lines[i];
-                        String[] columns = lines[i].split(",");
-                        result.add(columns);
-                }
+                result.addAll(Arrays.asList(lines).subList(1, lines.length));
             }
         }
-        for (int m = 10; m < 13; m++) {
-            String file = readFiles("C:\\Users\\Admin\\IdeaProjects\\sprint1\\files\\m.2024"+m+".csv");
+        if (Integer.parseInt(month) >=  10) {
+            String file = readFiles("C:\\Users\\Admin\\IdeaProjects\\sprint1\\files\\m.2024"+month+".csv");
             if (file != null) {
                 String[] lines = file.split("\\n");
-                for (int i = 1; i < lines.length; i++) {
-                    lines[i] = m+ "," + lines[i];
-                    String[] columns = lines[i].split(",");
-                    result.add(columns);
-                }
+                result.addAll(Arrays.asList(lines).subList(1, lines.length));
             }
         }
         return result;
     }
-    private static void showFile(ArrayList<String[]> file){
-        for (String[] value : file) {
-            System.out.println(value[0]+" "+value[1]+" "+value[2]+" "+value[3]+" "+value[4]);
+    private static void showFile(ArrayList<String> file){
+        for (String value : file) {
+            System.out.println(value);
         }
     }
     private static void showArray(String[] file){
@@ -71,30 +66,25 @@ public class Main {
             System.out.println(value);
         }
     }
-    private static ArrayList<String> monthReport(ArrayList<String[]> fileLines, String month){
+    private static ArrayList<String> monthReport(ArrayList<String> fileLines, String month){
         ArrayList<String> result = new ArrayList<>();//Результирующий список с отчетом
-        String[] readLine = new String[4];//Массив для считывания строки
         String writeToReport = "0";//Строка для обработки записи в отчет
-        for (String[] fileLine : fileLines) {//Запись в список уникальных пар Объект + Тип транзакции
-            readLine = fileLine;
-            if (readLine[0].equals(month)) {
-                writeToReport = readLine[1] + " " + readLine[2];
+        for (String fileLine : fileLines) {//Запись в список уникальных пар Объект + Тип транзакции
+            String[] readLine = fileLine.split(",");
+                writeToReport = readLine[0] + " " + readLine[1];
                 if (!result.contains(writeToReport)) {
                     result.add(writeToReport);
                 }
-            }
         }
         for (String currResultLine : result) {//Проходимся по уникальным парам и плюсуем в них соответвующие транзакции
             double sum = 0;
             double cost = 0;
-            for (String[] fileLine : fileLines) {
-                readLine = fileLine;
-                if (readLine[0].equals(month)) {
-                    if (currResultLine.equals(readLine[1] + " " + readLine[2])) {
-                        sum += Double.parseDouble(readLine[3]);
-                        cost = Double.parseDouble(readLine[4]);
+            for (String fileLine : fileLines) {
+                String[] readLine = fileLine.split(",");
+                    if (currResultLine.equals(readLine[0] + " " + readLine[1])) {
+                        sum += Double.parseDouble(readLine[2]);
+                        cost = Double.parseDouble(readLine[3]);
                     }
-                }
             }
             result.set(result.indexOf(currResultLine),currResultLine + " " + sum + " " + cost);
         }
@@ -104,9 +94,10 @@ public class Main {
         return result;
     }
     private static String choosePath (String fileName){
-        System.out.println("Путь по умолчанию:\n" +
-                "C:\\Users\\Admin\\IdeaProjects\\sprint1\n" +
-                "Хотие изменить путь? (Y/N)");
+        System.out.println("""
+                Путь по умолчанию:
+                C:\\Users\\Admin\\IdeaProjects\\sprint1
+                Хотие изменить путь? (Y/N)""");
         Scanner scanner = new Scanner(System.in);
         String choise = "0";
         choise = scanner.nextLine();
