@@ -8,29 +8,35 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         String command = "Start";
         ArrayList<String> fileLines = new ArrayList<>();//Список для хранения данных из файлов
-        ArrayList<String> finalRep = new ArrayList<>();//Список для хранения отчетов
+        ArrayList<String> yearRep = new ArrayList<>();//Список для хранения отчетов
+        ArrayList<String> monthRep = new ArrayList<>();//Список для хранения отчетов
 
         while (!command.equals("E")){
             System.out.println("Введите команду:\t" +
                     "M-Месячный отчет\t" +
                     "Y-Годовой отчет\t" +
+                    "S-Вывести отчет\t" +
+                    "С-Проверить отчет\t" +
                     "E-Выход\t");
             command = scanner.nextLine();
-            if (command.equals("S")){
-                System.out.println("Пожалуйста введите номер месяца:");
-                String month = scanner.nextLine();
-                fileLines = getLines(month);
-                showFile(fileLines);
-                }
-            else if (command.equals("M")){
-                System.out.println("Пожалуйста введите номер месяца:");
+            switch (command) {
+                case "S" -> {
+                    System.out.println("Годовой отчет - Y, месячный отчет - M");
                     String month = scanner.nextLine();
-                    fileLines = getLines(month);//Считываем файл
-                    finalRep = monthReport(fileLines, month);
-            }
-            else if (command.equals("Y")){
-                fileLines = getLines("0");//Считываем файл
-                finalRep = yearReport(fileLines);
+                    if (month.equals("M")) {
+                        showFile(monthRep);
+                    }
+                    if (month.equals("Y")) {
+                        showFile(yearRep);
+                    }
+                }
+                case "M" -> {
+                    System.out.println("Пожалуйста введите номер месяца:");
+                    String month = scanner.nextLine();
+                    monthRep = monthReport(getLines(month), month);
+                }
+                case "Y" -> yearRep = yearReport(getLines("0"));
+                case "C" -> checkReports();
             }
         }
     }
@@ -109,9 +115,10 @@ public class Main {
             }
             result.set(result.indexOf(currResultLine),currResultLine + " " + sum + " " + cost);
         }
-        for (String curr :result){
-            System.out.println(curr);
-        }
+//        for (String curr :result){
+//            System.out.println(curr);
+//        }
+        System.out.println("Отчет за месяц построен");
         return result;
     }
     private static ArrayList<String> yearReport(ArrayList<String> fileLines){
@@ -134,9 +141,10 @@ public class Main {
             }
             result.set(result.indexOf(currResultLine),currResultLine + "," + sum);
         }
-        for (String curr :result){
-            System.out.println(curr);
-        }
+//        for (String curr :result){
+//            System.out.println(curr);
+//        }
+        System.out.println("Годовой отчет построен");
         return result;
     }
     private static String choosePath (String fileName){
@@ -157,5 +165,31 @@ public class Main {
             System.out.println("Команда не верна. Введите Y или N");
             return "0";
         }
+    }
+    private static void checkReports (){
+        ArrayList<String> monthRep = new ArrayList<>();
+        ArrayList<String> yearRep = new ArrayList<>();
+        double income = 0;
+        double outcome = 0;
+        yearRep = yearReport(getLines("0"));
+        for (int i = 1; i < yearRep.size()/2+1; i++){
+            monthRep = monthReport(getLines(String.valueOf(i)), String.valueOf(i));
+            income=outcome=0;
+            for (String currLine : monthRep) {
+                String[] currVal = currLine.split(" ");
+                if (currVal[1].equals("TRUE")) {
+                    outcome += Double.parseDouble(currVal[2]) * Double.parseDouble(currVal[3]);
+                } else if (currVal[1].equals("FALSE")) {
+                    income += Double.parseDouble(currVal[2]) * Double.parseDouble(currVal[3]);
+                }
+            }
+            if (!(outcome == Double.parseDouble(yearRep.get(2*(i-1)).split(",")[2]))){
+                System.out.println("Траты за месяц " + i + " не сходятся");
+            }
+            if (!(income == Double.parseDouble(yearRep.get(2*(i-1)+1).split(",")[2]))) {
+                System.out.println("Доход за месяц " + i + " не сходится");
+            }
+        }
+        System.out.println("Проверка завершена");
     }
 }
