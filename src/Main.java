@@ -7,7 +7,6 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         String command = "Start";
-        ArrayList<String> fileLines = new ArrayList<>();//Список для хранения данных из файлов
         ArrayList<String> yearRep = new ArrayList<>();//Список для хранения отчетов
         ArrayList<String> monthRep = new ArrayList<>();//Список для хранения отчетов
 
@@ -15,25 +14,18 @@ public class Main {
             System.out.println("Введите команду:\t" +
                     "M-Месячный отчет\t" +
                     "Y-Годовой отчет\t" +
-                    "S-Вывести отчет\t" +
+                    "Sm-Вывести месячный отчет\t" +
+                    "Sy-Вывести годовой отчет\t" +
                     "С-Проверить отчет\t" +
                     "E-Выход\t");
             command = scanner.nextLine();
             switch (command) {
-                case "S" -> {
-                    System.out.println("Годовой отчет - Y, месячный отчет - M");
-                    String month = scanner.nextLine();
-                    if (month.equals("M")) {
-                        showFile(monthRep);
-                    }
-                    if (month.equals("Y")) {
-                        showFile(yearRep);
-                    }
-                }
+                case "Sm" -> showFile(monthRep);
+                case "Sy" -> showFile(yearRep);
                 case "M" -> {
                     System.out.println("Пожалуйста введите номер месяца:");
                     String month = scanner.nextLine();
-                    monthRep = monthReport(getLines(month), month);
+                    monthRep = monthReport(getLines(month));
                 }
                 case "Y" -> yearRep = yearReport(getLines("0"));
                 case "C" -> checkReports();
@@ -93,9 +85,9 @@ public class Main {
             System.out.println(value);
         }
     }
-    private static ArrayList<String> monthReport(ArrayList<String> fileLines, String month){
+    private static ArrayList<String> monthReport(ArrayList<String> fileLines){
         ArrayList<String> result = new ArrayList<>();//Результирующий список с отчетом
-        String writeToReport = "0";//Строка для обработки записи в отчет
+        String writeToReport;//Строка для обработки записи в отчет
         for (String fileLine : fileLines) {//Запись в список уникальных пар Объект + Тип транзакции
             String[] readLine = fileLine.split(",");
                 writeToReport = readLine[0] + " " + readLine[1];
@@ -123,7 +115,7 @@ public class Main {
     }
     private static ArrayList<String> yearReport(ArrayList<String> fileLines){
         ArrayList<String> result = new ArrayList<>();//Результирующий список с отчетом
-        String writeToReport = "0";//Строка для обработки записи в отчет
+        String writeToReport;//Строка для обработки записи в отчет
         for (String fileLine : fileLines) {//Запись в список уникальных пар месяц + Тип транзакции
             String[] readLine = fileLine.split(",");
             writeToReport = readLine[0] + "," + readLine[2];
@@ -147,33 +139,14 @@ public class Main {
         System.out.println("Годовой отчет построен");
         return result;
     }
-    private static String choosePath (String fileName){
-        System.out.println("""
-                Путь по умолчанию:
-                C:\\Users\\Admin\\IdeaProjects\\sprint1
-                Хотие изменить путь? (Y/N)""");
-        Scanner scanner = new Scanner(System.in);
-        String choise = "0";
-        choise = scanner.nextLine();
-        if(choise.equals("Y")){
-            System.out.println("Введите новый путь");
-            Scanner path = new Scanner(System.in);
-            return  readFiles(path+fileName);
-        } else if (choise.equals("N")) {
-            return readFiles("C:\\Users\\Admin\\IdeaProjects\\sprint1"+fileName);
-        } else {
-            System.out.println("Команда не верна. Введите Y или N");
-            return "0";
-        }
-    }
     private static void checkReports (){
-        ArrayList<String> monthRep = new ArrayList<>();
-        ArrayList<String> yearRep = new ArrayList<>();
-        double income = 0;
-        double outcome = 0;
+        ArrayList<String> monthRep;
+        ArrayList<String> yearRep;
+        double income;
+        double outcome;
         yearRep = yearReport(getLines("0"));
         for (int i = 1; i < yearRep.size()/2+1; i++){
-            monthRep = monthReport(getLines(String.valueOf(i)), String.valueOf(i));
+            monthRep = monthReport(getLines(String.valueOf(i)));
             income=outcome=0;
             for (String currLine : monthRep) {
                 String[] currVal = currLine.split(" ");
@@ -192,4 +165,22 @@ public class Main {
         }
         System.out.println("Проверка завершена");
     }
+//    private static String choosePath (String fileName){
+//        System.out.println("""
+//                Путь по умолчанию:
+//                C:\\Users\\Admin\\IdeaProjects\\sprint1
+//                Хотие изменить путь? (Y/N)""");
+//        String choise;
+//        choise = scanner.nextLine();
+//        if(choise.equals("Y")){
+//            System.out.println("Введите новый путь");
+//            Scanner path = new Scanner(System.in);
+//            return  readFiles(path+fileName);
+//        } else if (choise.equals("N")) {
+//            return readFiles("C:\\Users\\Admin\\IdeaProjects\\sprint1"+fileName);
+//        } else {
+//            System.out.println("Команда не верна. Введите Y или N");
+//            return "0";
+//        }
+//    }
 }
