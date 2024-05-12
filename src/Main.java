@@ -14,20 +14,26 @@ public class Main {
             System.out.println("Введите команду:\t" +
                     "M-Месячный отчет\t" +
                     "Y-Годовой отчет\t" +
-                    "Sm-Вывести месячный отчет\t" +
-                    "Sy-Вывести годовой отчет\t" +
+                    "SM-Вывести месячный отчет\t" +
+                    "SY-Вывести годовой отчет\t" +
+                    "AM-Вывести анализ по всем месяцам\t" +
                     "С-Проверить отчет\t" +
                     "E-Выход\t");
             command = scanner.nextLine();
             switch (command) {
-                case "Sm" -> showFile(monthRep);
-                case "Sy" -> showFile(yearRep);
+                case "SM" -> showFile(monthRep);
+                case "AM" -> allMonthReports();
+                case "SY" -> showFile(yearRep);
                 case "M" -> {
                     System.out.println("Пожалуйста введите номер месяца:");
                     String month = scanner.nextLine();
                     monthRep = monthReport(getLines(month));
+                    System.out.println("Отчет за месяц построен");
                 }
-                case "Y" -> yearRep = yearReport(getLines("0"));
+                case "Y" -> {
+                    yearRep = yearReport(getLines("0"));
+                    System.out.println("Годовой отчет построен");
+                }
                 case "C" -> checkReports();
             }
         }
@@ -81,36 +87,36 @@ public class Main {
         return result;
     }
     private static void showFile(ArrayList<String> file){
-        for (String value : file) {
-            System.out.println(value);
+        if (!file.isEmpty()) {
+            for (String value : file) {
+                System.out.println(value);
+            }
+        } else {
+            System.out.println("Пожалуйста, для начала простройте отчет");
         }
     }
-    private static ArrayList<String> monthReport(ArrayList<String> fileLines){
+    private static ArrayList<String> monthReport(ArrayList<String> fileLines) {
         ArrayList<String> result = new ArrayList<>();//Результирующий список с отчетом
         String writeToReport;//Строка для обработки записи в отчет
         for (String fileLine : fileLines) {//Запись в список уникальных пар Объект + Тип транзакции
             String[] readLine = fileLine.split(",");
-                writeToReport = readLine[0] + " " + readLine[1];
-                if (!result.contains(writeToReport)) {
-                    result.add(writeToReport);
-                }
+            writeToReport = readLine[0] + " " + readLine[1];
+            if (!result.contains(writeToReport)) {
+                result.add(writeToReport);
+            }
         }
-        for (String currResultLine : result) {//Проходимся по уникальным парам и плюсуем в них соответвующие транзакции
-            double sum = 0;
-            double cost = 0;
-            for (String fileLine : fileLines) {
-                String[] readLine = fileLine.split(",");
+            for (String currResultLine : result) {//Проходимся по уникальным парам и плюсуем в них соответвующие транзакции
+                double sum = 0;
+                double cost = 0;
+                for (String fileLine : fileLines) {
+                    String[] readLine = fileLine.split(",");
                     if (currResultLine.equals(readLine[0] + " " + readLine[1])) {
                         sum += Double.parseDouble(readLine[2]);
                         cost = Double.parseDouble(readLine[3]);
                     }
+                }
+                result.set(result.indexOf(currResultLine), currResultLine + " " + sum + " " + cost);
             }
-            result.set(result.indexOf(currResultLine),currResultLine + " " + sum + " " + cost);
-        }
-//        for (String curr :result){
-//            System.out.println(curr);
-//        }
-        System.out.println("Отчет за месяц построен");
         return result;
     }
     private static ArrayList<String> yearReport(ArrayList<String> fileLines){
@@ -136,7 +142,6 @@ public class Main {
 //        for (String curr :result){
 //            System.out.println(curr);
 //        }
-        System.out.println("Годовой отчет построен");
         return result;
     }
     private static void checkReports (){
@@ -165,22 +170,51 @@ public class Main {
         }
         System.out.println("Проверка завершена");
     }
-//    private static String choosePath (String fileName){
-//        System.out.println("""
-//                Путь по умолчанию:
-//                C:\\Users\\Admin\\IdeaProjects\\sprint1
-//                Хотие изменить путь? (Y/N)""");
-//        String choise;
-//        choise = scanner.nextLine();
-//        if(choise.equals("Y")){
-//            System.out.println("Введите новый путь");
-//            Scanner path = new Scanner(System.in);
-//            return  readFiles(path+fileName);
-//        } else if (choise.equals("N")) {
-//            return readFiles("C:\\Users\\Admin\\IdeaProjects\\sprint1"+fileName);
-//        } else {
-//            System.out.println("Команда не верна. Введите Y или N");
-//            return "0";
-//        }
-//    }
-}
+    private static void allMonthReports () {
+         ArrayList<String> currMonthLines;
+         double maxProfit = 0;
+         double maxWaste = 0;
+         String maxProfitItemName = "";
+         String maxWasteItemName = "";
+
+        for (int i = 1; i < 13; i++){
+            currMonthLines = monthReport(getLines(String.valueOf(i)));
+            for (String fileLine : currMonthLines) {
+                String[] currVal = fileLine.split(" ");
+                if (currVal[1].equals("TRUE") && Double.parseDouble(currVal[2])*Double.parseDouble(currVal[3])> maxWaste){
+                    maxWaste = Double.parseDouble(currVal[2])*Double.parseDouble(currVal[3]);
+                    maxWasteItemName = currVal[0];
+                }
+                if (currVal[1].equals("FALSE") && Double.parseDouble(currVal[2])*Double.parseDouble(currVal[3])>maxProfit){
+                    maxProfit = Double.parseDouble(currVal[2])*Double.parseDouble(currVal[3]);
+                    maxProfitItemName = currVal[0];
+                }
+            }
+            if(maxWaste != 0){
+                System.out.println("За месяц " + monthNumberToName(i) + " наибольшая трата была на товар " + maxWasteItemName + " и составила " + maxWaste);
+            } else System.out.println("За месяц " + monthNumberToName(i) + " трат не было");
+            if(maxProfit != 0){
+            System.out.println("За месяц " + monthNumberToName(i) +" наибольшую прибыль принес товар " + maxProfitItemName + " равную " + maxProfit);
+            } else System.out.println("За месяц " + monthNumberToName(i) + " прибыли не было");
+            maxWaste = maxProfit = 0;
+        }
+    }
+    private static String monthNumberToName (int monthNumber){
+        String monthName ="";
+        switch (monthNumber){
+            case 1 -> monthName = "Январь";
+            case 2 -> monthName = "Февраль";
+            case 3 -> monthName = "Март";
+            case 4 -> monthName = "Апрель";
+            case 5 -> monthName = "Май";
+            case 6 -> monthName = "Июнь";
+            case 7 -> monthName = "Июль";
+            case 8 -> monthName = "Август";
+            case 9 -> monthName = "Сентябрь";
+            case 10 -> monthName = "Октябрь";
+            case 11 -> monthName = "Ноябрь";
+            case 12 -> monthName = "Декабрь";
+            }
+            return monthName;
+        }
+    }
