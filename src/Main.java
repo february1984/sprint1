@@ -47,7 +47,7 @@ public class Main {
                     monthRep = monthReport(getLines(month, Integer.parseInt(year)));
                     if (!monthRep.isEmpty()) {
                     System.out.println("Отчет за месяц построен");
-                    } else System.out.println("За указанный период нет данных. Попробуйсте снова");
+                    } else System.out.println("За указанный период нет данных. Попробуйте снова");
                 }
                 case "Y" -> {
                     System.out.println("Пожалуйста введите год:");
@@ -55,7 +55,7 @@ public class Main {
                     yearRep = yearReport(getLines("0", Integer.parseInt(year)));
                     if (!yearRep.isEmpty()) {
                         System.out.println("Годовой отчет построен");
-                    } else System.out.println("За указанный период нет данных. Попробуйсте снова");
+                    } else System.out.println("За указанный период нет данных. Попробуйте снова");
                 }
                 case "C" -> {
                     System.out.println("Пожалуйста введите год:");
@@ -77,33 +77,14 @@ public class Main {
     private static ArrayList<String> getLines(String month, int year){
         ArrayList<String> result = new ArrayList<>();
             if (!month.equals("0")) {
-                if (Integer.parseInt(month) < 10) {
-                    String file = readFiles("C:\\Users\\Admin\\IdeaProjects\\sprint1\\files\\m." + year + "0" + month + ".csv");
+                    String file = readFiles("C:\\Users\\Admin\\IdeaProjects\\sprint1\\files\\m." + year + monthZeroAdder(Integer.parseInt(month)) + ".csv");
                     if (file != null) {
                         String[] lines = file.split("\\n");
                         result.addAll(Arrays.asList(lines).subList(1, lines.length));
                     }
-                }
-                if (Integer.parseInt(month) >= 10) {
-                    String file = readFiles("C:\\Users\\Admin\\IdeaProjects\\sprint1\\files\\m." + year + month + ".csv");
-                    if (file != null) {
-                        String[] lines = file.split("\\n");
-                        result.addAll(Arrays.asList(lines).subList(1, lines.length));
-                    }
-                }
             } else {
-                for (int i = 0; i < 10; i++) {
-                    String file = readFiles("C:\\Users\\Admin\\IdeaProjects\\sprint1\\files\\m." + year + "0" + i + ".csv");
-                    if (file != null) {
-                        String[] lines = file.split("\\n");
-                        for (int j = 0; j < lines.length; j++) {
-                            lines[j] = i + "," + lines[j];
-                        }
-                        result.addAll(Arrays.asList(lines).subList(1, lines.length));
-                    }
-                }
-                for (int i = 10; i < 13; i++) {
-                    String file = readFiles("C:\\Users\\Admin\\IdeaProjects\\sprint1\\files\\m."+ year + i + ".csv");
+                for (int i = 0; i < 13; i++) {
+                    String file = readFiles("C:\\Users\\Admin\\IdeaProjects\\sprint1\\files\\m." + year + monthZeroAdder(i) + ".csv");
                     if (file != null) {
                         String[] lines = file.split("\\n");
                         for (int j = 0; j < lines.length; j++) {
@@ -129,22 +110,22 @@ public class Main {
         String writeToReport;//Строка для обработки записи в отчет
         for (String fileLine : fileLines) {//Запись в список уникальных пар Объект + Тип транзакции
             String[] readLine = fileLine.split(",");
-            writeToReport = readLine[0] + " " + readLine[1];
+            writeToReport = readLine[0] + "," + readLine[1];
             if (!result.contains(writeToReport)) {
                 result.add(writeToReport);
             }
         }
-            for (String currResultLine : result) {//Проходимся по уникальным парам и плюсуем в них соответвующие транзакции
+            for (String currResultLine : result) {//Проходимся по уникальным парам и плюсуем в них соответствующие транзакции
                 double sum = 0;
                 double cost = 0;
                 for (String fileLine : fileLines) {
                     String[] readLine = fileLine.split(",");
-                    if (currResultLine.equals(readLine[0] + " " + readLine[1])) {
+                    if (currResultLine.equals(readLine[0] + "," + readLine[1])) {
                         sum += Double.parseDouble(readLine[2]);
                         cost = Double.parseDouble(readLine[3]);
                     }
                 }
-                result.set(result.indexOf(currResultLine), currResultLine + " " + sum + " " + cost);
+                result.set(result.indexOf(currResultLine), currResultLine + "," + sum + "," + cost);
             }
         return result;
     }
@@ -158,7 +139,7 @@ public class Main {
                 result.add(writeToReport);
             }
         }
-        for (String currResultLine : result) {//Проходимся по уникальным парам и плюсуем в них соответвующие транзакции
+        for (String currResultLine : result) {//Проходимся по уникальным парам и плюсуем в них соответствующие транзакции
             double sum = 0;
             for (String fileLine : fileLines) {
                 String[] readLine = fileLine.split(",");
@@ -168,9 +149,6 @@ public class Main {
             }
             result.set(result.indexOf(currResultLine),currResultLine + "," + sum);
         }
-//        for (String curr :result){
-//            System.out.println(curr);
-//        }
         return result;
     }
     private static void checkReports (int year){
@@ -180,10 +158,10 @@ public class Main {
         double outcome;
         yearRep = yearReport(getLines("0",year));
         for (int i = 1; i < yearRep.size()/2+1; i++){
-            monthRep = monthReport(getLines(String.valueOf(i),year));
+            monthRep = monthReport(getLines(yearRep.get((i*2)-1).split(",")[0],year));
             income=outcome=0;
             for (String currLine : monthRep) {
-                String[] currVal = currLine.split(" ");
+                String[] currVal = currLine.split(",");
                 if (currVal[1].equals("TRUE")) {
                     outcome += Double.parseDouble(currVal[2]) * Double.parseDouble(currVal[3]);
                 } else if (currVal[1].equals("FALSE")) {
@@ -209,7 +187,7 @@ public class Main {
         for (int i = 1; i < 13; i++){
             currMonthLines = monthReport(getLines(String.valueOf(i), year));
             for (String fileLine : currMonthLines) {
-                String[] currVal = fileLine.split(" ");
+                String[] currVal = fileLine.split(",");
                 if (currVal[1].equals("TRUE") && Double.parseDouble(currVal[2])*Double.parseDouble(currVal[3])> maxOutcome){
                     maxOutcome = Double.parseDouble(currVal[2])*Double.parseDouble(currVal[3]);
                     maxWasteItemName = currVal[0];
@@ -230,13 +208,15 @@ public class Main {
     }
     private static void allYearReports(int yearFrom, int yearTo){
         ArrayList<String> currYearRep;
-        double monthProfit = 0;
-        double incomeSum = 0;
-        double outcomeSum = 0;
-        int incomeCount = 0;
-        int outcomeCount = 0;
-        int currMonth = 1;
+        double monthProfit;
+        double incomeSum;
+        double outcomeSum;
+        int incomeCount;
+        int outcomeCount;
+        int currMonth;
         for (int i = yearFrom; i <= yearTo; i++){
+            monthProfit = incomeSum = outcomeSum = incomeCount = outcomeCount = 0;
+            currMonth = 1;
             currYearRep = yearReport(getLines("0",i));
             for (int j = 0; j < currYearRep.size(); j++){
                 String[] readLine = currYearRep.get(j).split(",");
@@ -249,9 +229,9 @@ public class Main {
                     incomeSum += Double.parseDouble(readLine[2]);
                     incomeCount++;
                 }else {
-                    System.out.println("Год "+ i + ": Прибыль за месяц " + monthNumberToName(j/2) + " составила " + monthProfit);
+                    System.out.println("Год "+ i + ": Прибыль за месяц " + monthNumberToName(currMonth) + " составила " + monthProfit);
                     monthProfit = 0;
-                    currMonth++;
+                    currMonth = Integer.parseInt(readLine[0]);
                     j--;
                 }
             }
@@ -259,11 +239,10 @@ public class Main {
                 System.out.println("Год "+ i +": За данный год не было операций");
             }
             else {
-                System.out.println("Год "+ i + ": Прибыль за месяц " + monthNumberToName(currYearRep.size()/2) + " составила " + monthProfit);
-                System.out.println("Год "+ i + ": Средний расход составил " + Math.round(outcomeSum/outcomeCount));
-                System.out.println("Год "+ i + ": Средний доход составил " + Math.round(incomeSum/incomeCount));
+                    System.out.println("Год " + i + ": Прибыль за месяц " + monthNumberToName(currMonth) + " составила " + monthProfit);
+                    System.out.println("Год " + i + ": Средний расход составил " + Math.round(outcomeSum / outcomeCount));
+                    System.out.println("Год " + i + ": Средний доход составил " + Math.round(incomeSum / incomeCount));
             }
-            monthProfit = 0;
         }
     }
     private static String monthNumberToName (int monthNumber){
@@ -284,4 +263,9 @@ public class Main {
             }
             return monthName;
         }
+    private static String monthZeroAdder (int monthNumber){
+        if(monthNumber < 10){
+            return "0"+monthNumber;
+        } else return String.valueOf(monthNumber);
+    }
     }
